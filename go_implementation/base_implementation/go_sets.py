@@ -1,6 +1,6 @@
 import copy
 from collections import namedtuple
-N = 19
+N = 9
 NN = N ** 2
 WHITE, BLACK, EMPTY = 'O', 'X', '.'
 
