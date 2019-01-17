@@ -3,9 +3,9 @@ import itertools
 import re
 import textwrap
 import time
-import go_naive
-import go_mutable
-import go_sets
+from go_implementation.base_implementation import go_mutable
+from go_implementation.base_implementation import go_sets, go_naive
+
 
 def load_board(string):
     return re.sub(r'[^XO\.]+', '', string)

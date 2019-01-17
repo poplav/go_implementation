@@ -1,15 +1,15 @@
 import re
 import unittest
-from go_sets import Position, LibertyTracker, N, NN, WHITE, BLACK, EMPTY
+from go_implementation.base_implementation.go_sets import Position, LibertyTracker, N, NN, WHITE, BLACK, EMPTY
 
 def load_board(string):
     return re.sub(r'[^XO\.]+', '', string)
 
-EMPTY_ROW = EMPTY * 19
+EMPTY_ROW = EMPTY * N
 
 class TestLibertyTracker(unittest.TestCase):
     def test_lib_tracker_init(self):
-        board = load_board(BLACK + EMPTY*18 + EMPTY_ROW * 18)
+        board = load_board(BLACK + EMPTY*(N-1) + EMPTY_ROW * (N-1))
 
         libtracker = LibertyTracker.from_board(board)
         self.assertEqual(len(libtracker.groups), 1)
@@ -21,7 +21,7 @@ class TestLibertyTracker(unittest.TestCase):
         self.assertEqual(sole_group.color, BLACK)
 
     def test_place_stone(self):
-        board = load_board(BLACK + EMPTY * 18 + EMPTY_ROW * 18)
+        board = load_board(BLACK + EMPTY * (N-1) + EMPTY_ROW * (N-1))
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, _ = libtracker.add_stone(BLACK, 1)
         self.assertEqual(len(new_lib_tracker.groups), 1)
@@ -33,7 +33,7 @@ class TestLibertyTracker(unittest.TestCase):
         self.assertEqual(sole_group.color, BLACK)
 
     def test_place_stone_opposite_color(self):
-        board = load_board(BLACK + EMPTY * 18 + EMPTY_ROW * 18)
+        board = load_board(BLACK + EMPTY * (N-1) + EMPTY_ROW * (N-1))
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, _ = libtracker.add_stone(WHITE, 1)
         self.assertEqual(len(new_lib_tracker.groups), 2)
@@ -50,11 +50,12 @@ class TestLibertyTracker(unittest.TestCase):
         self.assertEqual(white_group.color, WHITE)
 
     def test_merge_multiple_groups(self):
-        board = load_board('''
-        .X.................
-        X.X................
-        .X.................
-        ''' + EMPTY_ROW * 16)
+        board = load_board(
+            EMPTY + BLACK + EMPTY * (N-2) +
+            BLACK + EMPTY + BLACK + EMPTY * (N-3) +
+            EMPTY + BLACK + EMPTY * (N-2) +
+            EMPTY_ROW * (N - 3)
+        )
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, _ = libtracker.add_stone(BLACK, N+1)
         self.assertEqual(len(new_lib_tracker.groups), 1)
@@ -69,11 +70,12 @@ class TestLibertyTracker(unittest.TestCase):
             self.assertEqual(new_lib_cache[stone], 6)
 
     def test_capture_stone(self):
-        board = load_board('''
-        .X.................
-        XO.................
-        .X.................
-        ''' + EMPTY_ROW * 16)
+        board = load_board(
+            EMPTY + BLACK + EMPTY * (N-2) +
+            BLACK + WHITE + EMPTY * (N-2) +
+            EMPTY + BLACK + EMPTY * (N-2) +
+            EMPTY_ROW * (N - 3)
+        )
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, captured = libtracker.add_stone(BLACK, N+2)
         self.assertEqual(len(new_lib_tracker.groups), 4)
@@ -81,11 +83,12 @@ class TestLibertyTracker(unittest.TestCase):
         self.assertEqual(captured, {N+1})
 
     def test_capture_many(self):
-        board = load_board('''
-        .XX................
-        XOO................
-        .XX................
-        ''' + EMPTY_ROW * 16)
+        board = load_board(
+            EMPTY + BLACK * 2 + EMPTY * (N-3) +
+            BLACK + WHITE * 2 + EMPTY * (N-3) +
+            EMPTY + BLACK * 2 + EMPTY * (N-3) +
+            EMPTY_ROW * (N - 3)
+        )
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, captured = libtracker.add_stone(BLACK, N+3)
         self.assertEqual(len(new_lib_tracker.groups), 4)
@@ -121,11 +124,12 @@ class TestLibertyTracker(unittest.TestCase):
             self.assertEqual(new_lib_cache[stone], 0)
 
     def test_capture_multiple_groups(self):
-        board = load_board('''
-        .OX................
-        OXX................
-        XX.................
-        ''' + EMPTY_ROW * 16)
+        board = load_board(
+            EMPTY + WHITE + BLACK + EMPTY * (N-3) +
+            WHITE + BLACK * 2 + EMPTY * (N-3) +
+            BLACK * 2 + EMPTY * (N-2) +
+            EMPTY_ROW * (N - 3)
+        )
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, captured = libtracker.add_stone(BLACK, 0)
         self.assertEqual(len(new_lib_tracker.groups), 2)
@@ -145,13 +149,12 @@ class TestLibertyTracker(unittest.TestCase):
         for stone in surrounding_stones.stones:
             self.assertEqual(new_lib_cache[stone], 7)
 
-
     def test_same_friendly_group_neighboring_twice(self):
-        board = load_board('''
-        XX.................
-        X..................
-        ''' + EMPTY_ROW * 17)
-
+        board = load_board(
+            BLACK * 2 + EMPTY * (N-2) +
+            BLACK + EMPTY * (N-1) +
+            EMPTY_ROW * (N - 2)
+        )
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, captured = libtracker.add_stone(BLACK, N+1)
         self.assertEqual(len(new_lib_tracker.groups), 1)
@@ -162,11 +165,11 @@ class TestLibertyTracker(unittest.TestCase):
         self.assertEqual(captured, set())
 
     def test_same_opponent_group_neighboring_twice(self):
-        board = load_board('''
-        XX.................
-        X..................
-        ''' + EMPTY_ROW * 17)
-
+        board = load_board(
+            BLACK * 2 + EMPTY * (N-2) +
+            BLACK + EMPTY * (N-1) +
+            EMPTY_ROW * (N - 2)
+        )
         libtracker = LibertyTracker.from_board(board)
         new_lib_tracker, captured = libtracker.add_stone(WHITE, N+1)
         self.assertEqual(len(new_lib_tracker.groups), 2)
@@ -183,23 +186,26 @@ class TestLibertyTracker(unittest.TestCase):
 
 class TestPosition(unittest.TestCase):
     def test_capture_and_play(self):
-        board = load_board('''
-        OX.................
-        ''' + EMPTY_ROW * 18)
+        board = load_board(
+            WHITE + BLACK + EMPTY * (N-2) +
+            EMPTY_ROW * (N - 1)
+        )
         position = Position(board, None, LibertyTracker.from_board(board))
 
         captured_position = position.play_move(N, BLACK)
-        captured_board = load_board('''
-        .X.................
-        X..................
-        ''' + EMPTY_ROW * 17)
+        captured_board = load_board(
+            EMPTY + BLACK + EMPTY * (N-2) +
+            BLACK + EMPTY * (N-1) +
+            EMPTY_ROW * (N-2)
+        )
         self.assertEqual(captured_position.board, captured_board)
 
         filled_in_position = captured_position.play_move(0, BLACK)
-        filled_in_board = load_board('''
-        XX.................
-        X..................
-        ''' + EMPTY_ROW * 17)
+        filled_in_board = load_board(
+            BLACK * 2 + EMPTY * (N-2) +
+            BLACK + EMPTY * (N-1) +
+            EMPTY_ROW * (N-2)
+        )
         self.assertEqual(filled_in_position.board, filled_in_board)
 
 

@@ -1,1 +1,2 @@
+pytest
 -e git+https://github.com/evanhempel/python-flamegraph.git#egg=flamegraph
