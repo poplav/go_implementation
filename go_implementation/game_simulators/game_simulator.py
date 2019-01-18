@@ -1,5 +1,6 @@
 from go_implementation.base_implementation.go_sets import Position, WHITE, BLACK
 from go_implementation.players.random_player import RandomPlayer
+from go_implementation.players.human_player import HumanPlayer
 import time
 
 
@@ -41,7 +42,8 @@ class GameSimulator:
 if __name__ == '__main__':
     game_sim = GameSimulator()
     player_one = RandomPlayer(BLACK)
-    player_two = RandomPlayer(WHITE)
+    # player_two = RandomPlayer(WHITE)
+    player_two = HumanPlayer(WHITE)
     start = time.time()
     game_state_history = game_sim.play_game(player_one, player_two)
     end = time.time()
