@@ -27,7 +27,7 @@ def should_pass(board, color, ko):
     simulate_positions = Position(board=board, ko=ko, liberty_tracker=LibertyTracker.from_board(board))
     score = simulate_positions.score()
     player_score = score if color == BLACK else score*-1
-    opponent_color = WHITE if color == BLACK else WHITE
+    opponent_color = WHITE if color == BLACK else BLACK
     # while player_score > 0 and the opponent can make moves do moves and check if you win no matter what
     opponent_possible_actions = possible_actions(simulate_positions.get_board(), opponent_color,
                                                  simulate_positions.ko)
